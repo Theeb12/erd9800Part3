@@ -1,0 +1,688 @@
+Queries and use case information: 
+
+1. GET api/flights/future
+possible query parameters:
+	departure_city
+	departure_airport
+	destination_city
+	destination_airport
+	departure_date
+	return_date
+
+Does not require authentication
+either departure_city or departure_airport should exist, cannot have both, same for destination.
+departure date is required, return date is optional
+return all flights fulfill the condition specified
+
+return object structure:
+{
+	flights_to: [
+		{
+			airline_name,
+			flight_number,
+			departure_date_time,
+			departure_airport_code,
+			arrival_date_time,
+			arrival_airport_code,
+			base_price,
+			airplane: {
+				id,
+				seat_number,
+				manufacturing_company,
+				manufacturing_date,
+				age
+			}
+		},
+	],
+	(if return date is specified) flights_from: [
+		{
+			airline_name,
+			flight_number,
+			departure_date_time,
+			departure_airport_code,
+			arrival_date_time,
+			arrival_airport_code,
+			base_price,
+			airplane: {
+				id,
+				seat_number,
+				manufacturing_company,
+				manufacturing_date,
+				age
+			}
+		},
+	]
+}
+
+2. GET api/flights/status
+possible query parameters:
+	airline_name
+	flight_number
+	departure_date
+
+feature:
+does not require authentication
+return the status of the flight based on information given
+
+return object structure:
+{
+	airline_name,
+	flight_number,
+	departure_date_time,
+	departure_airport_code,
+	arrival_date_time,
+	arrival_airport_code,
+	base_price,
+	status,
+	airplane: {
+		id,
+		seat_number,
+		manufacturing_company,
+		manufacturing_date,
+		age
+	}
+}
+
+3. POST api/register
+possible body parameters:
+{
+	register_type (either 'customer' or 'staff')
+	// if type is customer
+	name: {
+		first_name
+		last_name
+	}
+	email
+	password
+	address: {
+		building_number
+		street_name
+		apartment_number
+		city
+		state
+		zip_code
+	}
+	phone_numbers: [array]
+	passport: {
+		number
+		expiration
+		country
+	}
+	date_of_birth
+
+	// if type is staff
+	username
+	password
+	name: {
+		first_name
+		last_name
+	}
+	date_of_birth
+	phone_number
+	email
+	airline
+}
+
+feature:
+register the new user
+
+return object structure:
+{
+	msg: either "success" or "failed"
+}
+
+4. POST api/login
+possible body parameters:
+{
+	user_type: (either 'customer' or 'staff')
+	username
+	password
+}
+
+feature:
+login the user in
+
+return object structure: (together with session data)
+{
+	msg: either "success" or "failed"
+}
+
+5. GET api/flights/schedule
+possible query parameters:
+	email
+	start_date
+	end_date
+	destination_city
+	destination_airport
+	departure_city
+	departure_airport
+	airline
+
+feature:
+NEEDS AUTHENTICATE
+return all future flights the user have scheduled
+if request user is staff, airline is required and only return flights belong to the airline
+
+return object structure:
+{
+	flights: [
+		{
+			ticket_id,
+			airline_name,
+			flight_number,
+			departure_date_time,
+			departure_airport_code,
+			arrival_date_time,
+			arrival_airport_code,
+			base_price,
+			actual_price,
+			status,
+			airplane: {
+				id,
+				seat_number,
+				manufacturing_company,
+				manufacturing_date,
+				age
+			},
+			comment: {
+				rating,
+				comment
+			},
+			customer: {
+				first_name,
+				last_name,
+				date_of_birth
+			}
+		}
+	]
+}
+
+6. GET api/tickets/price
+possible query parameters:
+	airline_name
+	flight_number
+	departure_date_time
+
+feature:
+does not require authentication
+return the calculated ticket price
+
+return object structure:
+{
+	calculated_price
+}
+	
+
+7. PUT api/tickets/register
+possible body parameters:
+{
+	type (either 'one-way' or 'round-trip')
+	email
+	card_type
+	card_number
+	card_name
+	expiration_date
+	first_name
+	last_name
+	date_of_birth
+	to: {
+		airline_name
+		flight_number
+		departure_date_time
+	}
+	(if type is round-trip) back: {
+		airline_name
+		flight_number
+		departure_date_time
+	}
+}
+
+feature:
+NEEDS AUTHENTICATION
+register tickets for the user
+if type is round-trip, registration should cancel if either ticket registration is failed
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+8. POST api/tickets/unregister
+possible body parameters:
+{
+	ticket_id
+}
+
+feature:
+NEEDS AUTHENTICATION
+cancel the ticket user registered
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+9. PUT api/comment
+possible body parameters:
+{
+	email
+	airline_name
+	flight_number
+	departure_date_time
+	rating
+	comment
+}
+
+feature:
+NEEDS AUTHENTICATION
+create comments for the flight
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+10. GET api/comment
+NEEDS AUTHENTICATION
+possible query parameters:
+	airline_name
+	flight_number
+	departure_date_time
+
+feature:
+return all comments to flights which belong to the flight
+
+return object structure:
+{
+	comments: [
+		{
+			author,
+			comment,
+			rating
+		}
+	]
+}
+
+11. GET api/spending
+possible query parameters:
+	email
+	from
+	to
+
+feature:
+NEEDS AUTHENTICATION
+return all ticket costs within the range, monthly
+
+return object structure:
+{
+	costs: [
+		{
+			month,
+			cost
+		}
+	]
+}
+
+12. POST api/logout
+no body parameter
+
+feature:
+log user out
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+13. GET api/flights
+possible query parameters:
+	airline
+	start_date
+	end_date
+	departure_city
+	departure_airport
+	destination_city
+	destination_airport
+
+feature:
+NEEDS AUTHENTICATION
+return all flights based on query result
+
+return object structure:
+{
+	flights: [
+		airline_name,
+		flight_number,
+		departure_date_time,
+		departure_airport_code,
+		arrival_date_time,
+		arrival_airport_code,
+		base_price,
+		status,
+		airplane: {
+			id,
+			seat_number,
+			manufacturing_company,
+			manufacturing_date,
+			age
+		}
+	]
+}
+
+14. GET api/customer/all
+possible query parameters:
+	airline
+	flight_number
+	departure_date_time
+
+feature:
+NEEDS AUTHENTICATION
+return all customer who registered for the flight
+
+return object structure:
+{
+	customers: [
+		{
+			email
+			first_name
+			last_name
+			phone_numbers: []
+			address: {
+				building_number
+				street_name
+				apartment_number
+				city
+				state
+				zip_code
+			}
+			passport: {
+				number
+				expiration
+				country
+			}
+			date_of_birth
+			purchased_date
+			price
+		}
+	],
+	flight: {
+		airline_name,
+		flight_number,
+		departure_date_time,
+		departure_airport_code,
+		arrival_date_time,
+		arrival_airport_code,
+		base_price,
+		status,
+		airplane: {
+			id,
+			seat_number,
+			manufacturing_company,
+			manufacturing_date,
+			age
+		}
+	}
+}
+
+15. PUT api/flights
+possible body parameters:
+{
+	airline_name,
+	flight_number,
+	departure_date_time,
+	departure_airport_code,
+	arrival_date_time,
+	arrival_airport_code,
+	base_price,
+	airplane_id
+}
+
+feature:
+NEEDS AUTHENTICATION
+create a new flight
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+16. POST api/flights/status
+possible body parameters:
+{
+	status
+	airline_name
+	flight_number
+	departure_date_time
+}
+
+feature:
+NEEDS AUTHENTICATION
+change the status of the flight
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+17. PUT api/airplane
+possible body parameters:
+{
+	airline_name,
+	seat_number,
+	manufacturing_company,
+	manufacturing_date,
+	age
+}
+
+feature:
+NEEDS AUTHENTICATION
+create a new airplane
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+(no longer use) 18. GET api/airplane
+possible query parameters:
+	airline
+
+feature:
+NEEDS AUTHENTICATION
+return airplanes that belong to the airline
+
+return object structure:
+{
+	airplanes: [
+		{
+			airline_name,
+			ID,
+			seat_number,
+			manufacturing_company,
+			manufacturing_date,
+			age
+		}
+	]
+}
+
+19. PUT api/airport
+possible body parameters:
+{
+	code,
+	name,
+	city,
+	country,
+	airport_type
+}
+
+feature:
+NEEDS AUTHENTICATION
+create a new airport
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+(no longer use) 20. GET api/flights/rating
+possible query parameters:
+	airline_name
+	flight_number
+	departure_date_time
+
+feature:
+NEEDS AUTHENTICATION
+return all comments of this flight
+
+return object structure:
+{
+	comments: [
+		comment,
+		rating
+	]
+}
+
+21. GET api/tickets
+possible query parameters:
+	airline
+	start_date
+	end_date
+
+feature:
+NEEDS AUTHENTICATION
+return all tickets of the airline sold within the range, grouped by month
+
+return object structure:
+{
+	tickets: [
+		{
+			year_month,
+			number
+		}
+	]
+}
+
+22. GET api/customer
+possible query parameters:
+	type (either customer or staff)
+	username
+
+feature:
+NEEDS AUTHENTICATION
+return all user information
+
+return object structure:
+{
+	(if type is customer)
+	email
+	first_name
+	last_name
+	phone_numbers: []
+	address: {
+		building_number
+		street_name
+		apartment_number
+		city
+		state
+		zip_code
+	}
+	passport: {
+		number
+		expiration
+		country
+	}
+	date_of_birth
+
+	(if type is staff)
+	username
+	first_name
+	last_name
+	airline_name
+	date_of_birth
+	phone_numbers: []
+	emails: []
+}
+
+23. GET api/revenue
+possible query parameters:
+	airline
+	start_date
+	end_date
+
+feature:
+NEEDS AUTHENTICATION
+return total revenue the airline earned during the period
+
+return object structure:
+{
+	revenue
+}
+
+24. GET api/customer/frequent
+possible query parameters:
+	airline
+	start_date
+	end_date
+
+feature:
+NEEDS AUTHENTICATION
+return customer who booked most tickets for the airline during the period
+
+return object structure:
+{
+	customer: {
+		email
+		first_name
+		last_name
+		phone_numbers: []
+		address: {
+			building_number
+			street_name
+			apartment_number
+			city
+			state
+			zip_code
+		}
+		passport: {
+			number
+			expiration
+			country
+		}
+		date_of_birth
+		count
+	}
+}
+
+25. POST api/user/phone_number
+possible body parameter:
+{
+	type: either "customer" or "staff"
+	username
+	phone_numbers: []
+}
+
+feature:
+NEEDS AUTHENTICATION
+update user phone_numbers
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
+26. POST api/user/email
+possible body parameter:
+{
+	username
+	emails: []
+}
+
+feature:
+NEEDS AUTHENTICATION
+update staff emails
+
+return object structure:
+{
+	msg: either 'success' or 'failed'
+}
+
