@@ -11,6 +11,7 @@ mydb_raw = mysql.connector.connect(
     host=os.getenv(f"mysql_host_{server_type}"),
     user=os.getenv(f"mysql_user_{server_type}"),
     password=os.getenv(f"mysql_password_{server_type}"),
+    database="air_ticket_reservation",
 )
 
 try:
@@ -20,7 +21,9 @@ try:
         password=os.getenv(f"mysql_password_{server_type}"),
         database="air_ticket_reservation",
     )
+    print("found database")
 except:
+    print("cant find shit")
     pass
 
 

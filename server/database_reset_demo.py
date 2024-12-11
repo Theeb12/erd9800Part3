@@ -1,6 +1,7 @@
 from database import mydb_raw
 import re
 import sys
+import mysql.connector
 
 
 def main():
@@ -55,7 +56,7 @@ def executeSQLFile(cursor, filename):
             try:
                 cursor.execute(statement)
                 statement = ""
-            except cursor.Error as e:
+            except mysql.connector.Error as e:
                 print(filename + " - Error applying (" + str(e) + ")\nTerminating.")
                 sys.exit(1)
 
