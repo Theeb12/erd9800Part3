@@ -57,9 +57,11 @@ def login():
 
         if not bcrypt.checkpw(body["password"].encode("utf-8"), users[0][0].encode("utf-8")):
             return {"msg": "wrong password"}, 403
-
-        access_token = create_access_token(identity={"type": "customer", "username": body["username"]})
-        refresh_token = create_refresh_token(identity={"type": "customer", "username": body["username"]})
+        print({"type": "customer", "username": body["username"]})
+        access_token = create_access_token(identity=body["username"])
+        refresh_token = create_refresh_token(identity=body["username"])
+        #access_token = create_access_token(identity={"type": "customer", "username": body["username"]})
+        #refresh_token = create_refresh_token(identity={"type": "customer", "username": body["username"]})
 
         response = make_response(
             jsonify(
@@ -73,8 +75,10 @@ def login():
                 }
             )
         )
+
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
+        
         response.headers["access-control-expose-headers"] = "Set-Cookie"
         response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
         response.headers["Access-Control-Allow-Credentials"] = "true"
@@ -105,10 +109,11 @@ def login():
 
         if not bcrypt.checkpw(body["password"].encode("utf-8"), user[0][0].encode("utf-8")):
             return {"msg": "wrong password"}, 403
-
-        access_token = create_access_token(identity={"type": "staff", "username": body["username"]})
-        refresh_token = create_refresh_token(identity={"type": "staff", "username": body["username"]})
-
+        access_token = create_access_token(identity=body["username"])
+        refresh_token = create_refresh_token(identity=body["username"])
+        #access_token = create_access_token(identity={"type": "staff", "username": body["username"]})
+        #refresh_token = create_refresh_token(identity={"type": "staff", "username": body["username"]})
+        
         response = make_response(
             jsonify(
                 {
@@ -120,8 +125,10 @@ def login():
                 }
             )
         )
+
         set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
+
         response.headers["access-control-expose-headers"] = "Set-Cookie"
         response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
         response.headers["Access-Control-Allow-Credentials"] = "true"

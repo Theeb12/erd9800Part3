@@ -13,6 +13,8 @@ import Comment from "./pages/Comment";
 import axios from "axios";
 import { getCookie } from "./utility";
 
+//const Dotenv = require("dotenv-webpack");
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -41,6 +43,7 @@ const router = createBrowserRouter([
 ]);
 
 const getUser = () => {
+    console.log(process.env.REACT_APP_backend_baseurl);
     const user = {
         type: localStorage.getItem("type"),
         username: localStorage.getItem("username"),

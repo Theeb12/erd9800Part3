@@ -29,6 +29,9 @@ const Login = (props) => {
 
     const loginHandler = async () => {
         let result;
+        //console.log(typeof(credential.username));
+        //console.log(typeof(credential.password));
+        //console.log(typeof(props.type));
         try {
             result = await axios.post(
                 `http://${process.env.REACT_APP_backend_baseurl}/api/login`,
@@ -40,8 +43,7 @@ const Login = (props) => {
                 {
                     withCredentials: true,
                 }
-            );
-
+            );  
             saveUser({
                 type: result.data.type,
                 username: credential.username,
