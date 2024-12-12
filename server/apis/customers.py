@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from database import getdb
 
@@ -17,10 +17,10 @@ def get_customer_info():
         return {"msg": "missing field"}, 422
 
     identity = get_jwt_identity()
-    if params["username"] != identity["username"]:
+    if params["username"] != get_jwt().get("username"):
         return {"msg": "username not match"}, 403
 
-    if params["type"] != identity["type"]:
+    if params["type"] != identity:
         return {"msg": "wrong user type"}, 409
 
     if params["type"] == "customer":
@@ -166,13 +166,13 @@ def get_customers():
         return {"msg": "missing field"}, 422
 
     identity = get_jwt_identity()
-    if identity["type"] != "staff":
+    if identity != "staff":
         return {"msg": "staff only"}, 403
 
     with getdb() as mydb:
         cursor = mydb.cursor()
 
-        if utility.getStaff(cursor, identity["username"], "airline_name")[0] != params["airline"]:
+        if utility.getStaff(cursor, get_jwt().get("username"), "airline_name")[0] != params["airline"]:
             return {"msg": "airline not match"}, 403
 
         flight = utility.getFlight(cursor, params["airline"], params["flight_number"], params["departure_date_time"])
@@ -259,13 +259,13 @@ def get_frequent_customers():
         return {"msg": "missing field"}, 422
 
     identity = get_jwt_identity()
-    if identity["type"] != "staff":
+    if identity != "staff":
         return {"msg": "staff only"}, 403
 
     with getdb() as mydb:
         cursor = mydb.cursor()
 
-        if utility.getStaff(cursor, identity["username"], "airline_name")[0] != params["airline"]:
+        if utility.getStaff(cursor, get_jwt().get("username"), "airline_name")[0] != params["airline"]:
             return {"msg": "airline not match"}, 403
 
         cursor.execute(

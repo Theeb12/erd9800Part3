@@ -39,7 +39,7 @@ CREATE TABLE airplane (
 );
 CREATE TABLE maintanence (
     airline_name VARCHAR(50) REFERENCES airline(name),
-    airplane_id INT REFERENCES airplane(ID),
+    airplane_id INT,
     start_date_time DATETIME,
     end_date_time DATETIME,
     PRIMARY KEY (airline_name, airplane_id, start_date_time, end_date_time)

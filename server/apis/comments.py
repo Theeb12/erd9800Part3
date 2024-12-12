@@ -3,7 +3,7 @@ import utility
 from database import getdb
 import json
 
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 comments_api = Blueprint("comments_api", __name__)
 
@@ -28,13 +28,13 @@ def get_comments():
         return {"msg": "Missing Field"}, 422
 
     identity = get_jwt_identity()
-    if identity["type"] != "staff":
+    if identity != "staff":
         return {"msg": "Staff Only"}, 403
 
     with getdb() as mydb:
         cursor = mydb.cursor()
 
-        if utility.getStaff(cursor, get_jwt_identity()["username"], "airline_name")[0] != params["airline_name"]:
+        if utility.getStaff(cursor, get_jwt().get("username"), "airline_name")[0] != params["airline_name"]:
             return {"msg": "airline staff is not authorized to get other airline's information "}, 403
 
         if (
@@ -87,10 +87,10 @@ def make_comments():
         return {"msg": "missing field"}, 422
 
     identity = get_jwt_identity()
-    if identity["type"] != "customer":
+    if identity != "customer":
         return {"msg": "Customer Only"}, 403
 
-    if identity["username"] != body["email"]:
+    if get_jwt().get("username") != body["email"]:
         return {"msg": "email not match"}, 403
 
     with getdb() as mydb:

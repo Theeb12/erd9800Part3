@@ -58,11 +58,10 @@ def login():
         if not bcrypt.checkpw(body["password"].encode("utf-8"), users[0][0].encode("utf-8")):
             return {"msg": "wrong password"}, 403
         print({"type": "customer", "username": body["username"]})
-        access_token = create_access_token(identity=body["username"])
-        refresh_token = create_refresh_token(identity=body["username"])
-        #access_token = create_access_token(identity={"type": "customer", "username": body["username"]})
-        #refresh_token = create_refresh_token(identity={"type": "customer", "username": body["username"]})
-
+        #access_token = create_access_token(identity=body["username"])
+        #refresh_token = create_refresh_token(identity=body["username"])
+        access_token = create_access_token(identity="customer", additional_claims={"username": body["username"]})
+        refresh_token = create_refresh_token(identity="customer", additional_claims={"username": body["username"]})
         response = make_response(
             jsonify(
                 {
@@ -109,8 +108,11 @@ def login():
 
         if not bcrypt.checkpw(body["password"].encode("utf-8"), user[0][0].encode("utf-8")):
             return {"msg": "wrong password"}, 403
-        access_token = create_access_token(identity=body["username"])
-        refresh_token = create_refresh_token(identity=body["username"])
+        
+        access_token = create_access_token(identity="staff", additional_claims={"username": body["username"]})
+        refresh_token = create_refresh_token(identity="staff", additional_claims={"username": body["username"]})
+        #access_token = create_access_token(identity=body["username"])
+        #refresh_token = create_refresh_token(identity=body["username"])
         #access_token = create_access_token(identity={"type": "staff", "username": body["username"]})
         #refresh_token = create_refresh_token(identity={"type": "staff", "username": body["username"]})
         
@@ -327,7 +329,7 @@ def add_phone_numbers():
     if "type" not in body:
         return {"msg": "missing field"}, 422
 
-    if get_jwt_identity()["type"] != body["type"]:
+    if get_jwt_identity() != body["type"]:
         return {"msg": "Wrong Type!"}, 403
 
     if body["type"] == "customer":
@@ -343,7 +345,7 @@ def add_phone_numbers():
         if body == False:
             return {"msg": "missing field"}, 422
 
-        if body["email"] != get_jwt_identity()["username"]:
+        if body["email"] != get_jwt().get("username"):
             return {"msg": "Cannot add phone numbers for other customers!"}, 403
 
         mydb = getdb()
@@ -383,7 +385,7 @@ def add_phone_numbers():
         if body == False:
             return {"msg": "missing field"}, 422
 
-        if body["username"] != get_jwt_identity()["username"]:
+        if body["username"] != get_jwt().get("username"):
             return {"msg": "Cannot add phone numbers for other staff!"}, 403
 
         mydb = getdb()
@@ -418,7 +420,7 @@ def add_phone_numbers():
 def add_emails():
     body = request.json
 
-    if get_jwt_identity()["type"] != "staff":
+    if get_jwt_identity() != "staff":
         return {"msg": "Staff Only!"}, 403
 
     body = utility.convertBody(
@@ -432,7 +434,7 @@ def add_emails():
     if body == False:
         return {"msg": "missing field"}, 422
 
-    if body["username"] != get_jwt_identity()["username"]:
+    if body["username"] != get_jwt().get("username"):
         return {"msg": "Cannot add emails for other staff!"}, 403
 
     mydb = getdb()

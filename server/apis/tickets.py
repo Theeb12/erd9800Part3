@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from flask_jwt_extended import (
+    get_jwt,
     get_jwt_identity,
     jwt_required,
 )
@@ -89,13 +90,15 @@ def get_tickets():
         return {"msg": "missing field"}, 422
 
     identity = get_jwt_identity()
-    if identity["type"] != "staff":
+    userN = get_jwt().get("username")
+
+    if identity != "staff":
         return {"msg": "staff only"}, 403
 
     with getdb() as mydb:
         cursor = mydb.cursor()
 
-        if utility.getStaff(cursor, identity["username"], "airline_name")[0] != params["airline"]:
+        if utility.getStaff(cursor, userN, "airline_name")[0] != params["airline"]:
             return {"msg": "airline unmatch"}, 403
 
         cursor.execute(
@@ -230,10 +233,12 @@ def create_new_ticket():
             return {"msg": "past flight"}, 409
 
     identity = get_jwt_identity()
-    if identity["type"] != "customer":
+    userN = get_jwt().get("username")
+
+    if identity != "customer":
         return {"msg": "customer only"}, 403
 
-    if identity["username"] != body["email"]:
+    if userN != body["email"]:
         return {"msg": "email not match"}, 403
 
     with getdb() as mydb:

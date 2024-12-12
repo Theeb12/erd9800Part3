@@ -25,7 +25,7 @@ def add_airport():
         return {"msg": "missing field"}, 422
 
     identity = get_jwt_identity()
-    if identity["type"] != "staff":
+    if identity != "staff":
         return {"msg": "Staff Only"}, 403
 
     with getdb() as mydb:

@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 import utility
 from database import getdb
 import json
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 airplane_api = Blueprint("airplane_api", __name__)
 
@@ -29,7 +29,7 @@ def create_airplanes():
         return {"msg": "missing field"}, 422
 
     identity = get_jwt_identity()
-    if identity["type"] != "staff":
+    if identity != "staff":
         return {"msg": "Staff Only"}, 403
 
     try:
@@ -41,7 +41,7 @@ def create_airplanes():
     with getdb() as mydb:
         cursor = mydb.cursor()
 
-        if utility.getStaff(cursor, get_jwt_identity()["username"], "airline_name")[0] != body["airline_name"]:
+        if utility.getStaff(cursor, get_jwt().get("username"), "airline_name")[0] != body["airline_name"]:
             return {"msg": "airline staff is not authorized to get other airline's information "}, 403
 
         try:
